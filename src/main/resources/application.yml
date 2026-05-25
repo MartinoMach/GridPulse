@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: gridpulse
+  datasource:
+    url: jdbc:postgresql://localhost:5432/gridpulse
+    username: gridpulse
+    password: gridpulse
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema.sql
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 1000
+        order_inserts: true
+        order_updates: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      retries: 2147483647
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        linger.ms: 5
+        batch.size: 65536
+        compression.type: lz4
+    consumer:
+      group-id: gridpulse-ingestion
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      properties:
+        isolation.level: read_committed
+        max.poll.records: 2000
+
+gridpulse:
+  kafka:
+    network-events-topic: network-events
+    consumer-concurrency: 8
+    worker-pool-size: 24
+  replay:
+    enabled: false
+    csv-path: ./data/kddcup.data_10_percent.csv
+    target-events-per-second: 60000
+    tick-millis: 100
+  simulator:
+    enabled: false
+    target-events-per-second: 60000
+  prediction:
+    lookback-minutes: 30
+    high-risk-threshold: 0.72
+    positive-labels-normalized-value: normal
+
+server:
+  port: 8080

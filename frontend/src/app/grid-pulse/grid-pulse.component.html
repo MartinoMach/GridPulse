@@ -1,0 +1,74 @@
+<main class="workspace">
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">GridPulse</p>
+      <h1>Predictive Failure Analysis Command Center</h1>
+    </div>
+    <div class="refresh">
+      <span>Last refresh</span>
+      <strong>{{ lastRefresh | date: 'HH:mm:ss' }}</strong>
+    </div>
+  </header>
+
+  <section class="metrics" aria-label="Model accuracy">
+    <div class="metric">
+      <span>Total predictions</span>
+      <strong>{{ accuracy?.totalPredictionsMade ?? 0 | number }}</strong>
+    </div>
+    <div class="metric">
+      <span>Correct</span>
+      <strong>{{ accuracy?.correctPredictions ?? 0 | number }}</strong>
+    </div>
+    <div class="metric">
+      <span>False positives</span>
+      <strong>{{ accuracy?.falsePositives ?? 0 | number }}</strong>
+    </div>
+    <div class="metric">
+      <span>False negatives</span>
+      <strong>{{ accuracy?.falseNegatives ?? 0 | number }}</strong>
+    </div>
+    <div class="metric accuracy">
+      <span>Accuracy</span>
+      <strong>{{ accuracy?.overallAccuracyPercent ?? 0 | number: '1.1-1' }}%</strong>
+    </div>
+  </section>
+
+  <section class="alerts">
+    <div class="section-heading">
+      <div>
+        <h2>At-risk assets</h2>
+        <p>Assets crossing the current high-risk threshold from the 30-minute event window.</p>
+      </div>
+      <span class="count">{{ alerts.length | number }} flagged</span>
+    </div>
+
+    <div class="table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>Asset</th>
+            <th>Risk</th>
+            <th>Estimated outage</th>
+            <th>Severity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let alert of alerts" [class]="rowClass(alert)">
+            <td>{{ alert.assetId }}</td>
+            <td>
+              <span class="risk-bar">
+                <span [style.width.%]="probabilityPercent(alert.failureProbability)"></span>
+              </span>
+              {{ probabilityPercent(alert.failureProbability) | number: '1.0-1' }}%
+            </td>
+            <td>{{ alert.estimatedTimeToFailure | date: 'MMM d, HH:mm' }}</td>
+            <td><span class="badge">{{ alert.severity }}</span></td>
+          </tr>
+          <tr *ngIf="alerts.length === 0">
+            <td colspan="4" class="empty">No high-risk assets are currently flagged.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
